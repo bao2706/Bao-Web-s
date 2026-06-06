@@ -15,7 +15,7 @@ if (!empty($_POST)) {
         $_SESSION['id'] = $user['id'];
         $_SESSION['name'] = $user['name'];
 
-        header('Location: main.php');
+        header('Location: ../main/main.php');
         exit();
 
     } else {
@@ -33,16 +33,21 @@ if (!empty($_POST)) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body style="background: linear-gradient(135deg, violet, skyBlue, lightGreen); min-height: 100vh;">
-        <?php 
-    if (isset($_GET['create']) && $_GET['create'] === '1') {
-        echo '<script>alert("User created successfully. Please log in.");</script>';
-    }
-    ?>
- 
-    .<div class="d-flex justify-content-center align-items-center" style="height: 50vh;">
 
-        <div class="col-11 col-sm-8 col-md-5 col-lg-4 p-4 bg-white rounded shadow-sm">
+ 
+    <div class="d-flex justify-content-center align-items-center" style="height: 100vh;">
+
+        <div class="col-11 col-sm-8 col-md-5 col-lg-4 p-4 bg-white rounded shadow-sm" style="margin: 50px auto;">
             <h2 class="text-center mb-4 text-dark fw-bold">Login</h2>
+                    <?php  if (isset($_SESSION['success'])): ?>
+            <div class="alert alert-success alert-dismissible fade show">
+        <?php
+            echo $_SESSION['success'];
+            unset($_SESSION['success']);
+        ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <?php endif; ?>
                     <?php if (isset($error['login'])): ?>
                         <div class="alert alert-danger alert-dismissible fade show p-2 small mb-3 text-center" role="alert">
                             <?php echo $error['login'];?> 
@@ -62,6 +67,8 @@ if (!empty($_POST)) {
             </div>
             <!-- Nút Login phủ kín chiều ngang của form cho đẹp -->
             <button type="submit" class="btn btn-success w-100">Login</button>
+            <p class="text-center my-2">or</p>
+            <a href="register.php" class="btn btn-primary w-100">Sign Up</a>
         </form>
 
     </div>

@@ -62,22 +62,28 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] === 'rewrite') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create User</title>
     <link rel="stylesheet" href="../css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src ="../js/login.js" defer></script>
+
+
 </head>
-<body>
-<form action="index.php" method="post" enctype="multipart/form-data">
-    <h1>Create User</h1>
+<body style="background: linear-gradient(135deg, violet, skyBlue, lightGreen); min-height: 100vh;">
+<div class="d-flex justify-content-center align-items-center" style="height: 100vh;">
+<div class="col-11 col-sm-8 col-md-5 col-lg-4 p-4 bg-white rounded shadow-sm" style="margin: 50px auto;">
+<form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post" enctype="multipart/form-data">
+        <h2 class="text-center mb-4 text-dark fw-bold">Create User</h2>
     <div>
         <label for="name">Full Name:</label>
-        <input type="text" name="name" id="name" value="<?php echo htmlspecialchars($_POST['name'] ?? ''); ?>">
+        <input type="text" name="name" id="name" class="form-control <?php echo isset($error['name']) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($_POST['name'] ?? ''); ?>">
         <?php if (isset($error['name'])): ?>
-            <span class="error">Please enter your full name.</span>
+            <span class="invalid-feedback">Please enter your full name.</span>
         <?php endif; ?>
     </div>
     <div>
-        <label for="email">Email:</label>
-        <input type="email" name="email" id="email" value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>">
+        <label for="email" >Email:</label>
+        <input type="email" name="email" id="email" class="form-control <?php echo isset($error['email']) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>">
         <?php if (isset($error['email'])): ?>
-            <span class="error">
+            <span class="invalid-feedback">
             <?php
             switch ($error['email']) {
                 case 'blank':
@@ -93,9 +99,9 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] === 'rewrite') {
     </div>
     <div>
         <label for="password">Password:</label>
-        <input type="password" name="password" id="password">
+        <input type="password" name="password" id="password" class="form-control <?php echo isset($error['password']) ? 'is-invalid' : ''; ?>">
         <?php if (isset($error['password'])): ?>
-            <span class="error">
+            <span class="invalid-feedback">
                 <?php if ($error['password'] === 'blank'): ?>
                     Please enter your password.
                 <?php elseif ($error['password'] === 'length'): ?>
@@ -104,7 +110,18 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] === 'rewrite') {
             </span>
         <?php endif; ?>
     </div>
-    <button type="submit">Create User</button>
+    <div class="mt-3">
+        <button type="submit" class="btn btn-success w-100">Create User</button>
+    </div>
+    <p class="text-center my-2">or</p>
+    <a href="login.php" class="btn btn-primary w-100">Back to Login</a>
 </form>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
+
 </html>

@@ -9,7 +9,7 @@ session_start();
     <title>Document</title>
 </head>
 <body>
-    <form action="./logout.php" method="post">
+    <form action="../register/logout.php" method="post">
         <input type="submit" value="Logout">
     </form>
 </body>

@@ -27,6 +27,7 @@ try {
         echo "DB error: " . $e->getMessage();
     }
 }
-header('Location: login.php?create=1');
+$_SESSION['success'] = 'User created successfully. Please log in.';
+header('Location: login.php');
 exit();
 ?>
