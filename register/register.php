@@ -67,7 +67,7 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] === 'rewrite') {
 
 
 </head>
-<body style="background: linear-gradient(135deg, violet, skyBlue, lightGreen); min-height: 100vh;">
+<body style=" min-height: 100vh;">
 <div class="d-flex justify-content-center align-items-center" style="height: 100vh;">
 <div class="col-11 col-sm-8 col-md-5 col-lg-4 p-4 bg-white rounded shadow-sm" style="margin: 50px auto;">
 <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post" enctype="multipart/form-data">

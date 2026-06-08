@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apple Style Expense Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- <link href="https://fonts.cdnfonts.com/css/sf-pro-display" rel="stylesheet"> -->
+
+    <style>
+        body {
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            letter-spacing: -0.01em;
+        }
+
+        /* Thao tác mượt mà theo chuẩn iOS */
+        .btn, .card-apple, .form-control {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .navbar-custom {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px); /* Hiệu ứng kính mờ của Apple */
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+        }
+
+        .card-apple {
+            border: none;
+            border-radius: 20px;
+            background: #ffffff;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        .card-apple:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        }
+
+        .balance {
+            font-size: 2.75rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            color: #000000;
+        }
+
+        .text-income { color: #34c759; }  /* Xanh lá Apple */
+        .text-expense { color: #ff3b30; } /* Đỏ Apple */
+
+        /* Khu vực chứa biểu đồ */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 260px;
+        }
+
+        /* Nút phong cách Apple */
+        .btn-apple-primary {
+            background-color: #0071e3;
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-weight: 500;
+            padding: 10px 20px;
+        }
+        .btn-apple-primary:hover {
+            background-color: #0077ed;
+            color: #ffffff;
+        }
+
+        .btn-light-apple {
+            background: #f5f5f7;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 14px;
+        }
+        .btn-light-apple:hover {
+            background: #e8e8ed;
+        }
+
+        /* Form tinh chỉnh */
+        .form-control, .form-select {
+            background-color: #f5f5f7;
+            border: 1px solid transparent;
+            border-radius: 12px;
+            padding: 12px;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #ffffff;
+            border-color: #0071e3;
+            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15);
+        }
+
+        /* Danh sách giao dịch */
+        .transaction-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid #f5f5f7;
+        }
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+
+        .icon-box {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-right: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-custom py-3">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-dark d-flex align-items-center gap-2" href="#">
+                <i class="bi bi-wallet2 text-primary"></i> Ví của tôi
+            </a>
+            <div>
+                <button class="btn btn-light-apple position-relative">
+                    <i class="bi bi-bell-fill text-secondary"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                        3
+                    </span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="row g-4">
+            
+            <div class="col-lg-5">
+                <div class="card-apple p-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted text-uppercase fw-semibold tracking-wider">Tổng tài sản khả dụng</small>
+                        <span class="badge bg-success-subtle text-success rounded-pill px-2.5 py-1">Ổn định</span>
+                    </div>
+                    <div class="balance">¥120,000</div>
+                    
+                    <div class="row mt-4 pt-2 border-top border-light">
+                        <div class="col-6 border-end">
+                            <small class="text-muted d-block mb-1">Thu nhập</small>
+                            <span class="fw-bold text-income">+¥45,000</span>
+                        </div>
+                        <div class="col-6 ps-3">
+                            <small class="text-muted d-block mb-1">Chi tiêu</small>
+                            <span class="fw-bold text-expense">-¥12,500</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-apple p-4">
+                    <h5 class="fw-bold mb-4">Tạo giao dịch mới</h5>
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label small text-muted fw-medium">Số tiền (¥)</label>
+                            <input type="number" class="form-control" placeholder="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-muted fw-medium">Danh mục</label>
+                            <select class="form-select">
+                                <option>Ăn uống 🍔</option>
+                                <option>Di chuyển 🚗</option>
+                                <option>Mua sắm 🛍️</option>
+                                <option>Giải trí 🎬</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-apple-primary w-100 mt-2">Xác nhận ghi chép</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="card-apple p-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold m-0">📊 Thống kê chi tiêu</h5>
+                        <select class="form-select form-select-sm bg-transparent border-0 text-muted fw-medium p-0 pe-4" style="width: auto;">
+                            <option>Tháng này</option>
+                            <option>Tháng trước</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="expenseChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card-apple p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold m-0">Lịch sử gần đây</h5>
+                        <a href="#" class="text-decoration-none small fw-medium text-primary">Xem tất cả</a>
+                    </div>
+                    
+                    <div class="transaction-list">
+                        <div class="transaction-item">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-box bg-warning-subtle text-warning">🍔</div>
+                                <div>
+                                    <h6 class="mb-0 fw-semibold">Bữa trưa tại nhà hàng</h6>
+                                    <small class="text-muted" style="font-size: 0.8rem;">Hôm nay, 12:30</small>
+                                </div>
+                            </div>
+                            <span class="fw-bold text-expense">-¥1,500</span>
+                        </div>
+
+                        <div class="transaction-item">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-box bg-success-subtle text-success">💰</div>
+                                <div>
+                                    <h6 class="mb-0 fw-semibold">Nhận tiền lương</h6>
+                                    <small class="text-muted" style="font-size: 0.8rem;">Hôm qua, 09:00</small>
+                                </div>
+                            </div>
+                            <span class="fw-bold text-income">+¥45,000</span>
+                        </div>
+
+                        <div class="transaction-item">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-box bg-primary-subtle text-primary">🛍️</div>
+                                <div>
+                                    <h6 class="mb-0 fw-semibold">Mua quần áo mới</h6>
+                                    <small class="text-muted" style="font-size: 0.8rem;">05 Tháng 6, 18:45</small>
+                                </div>
+                            </div>
+                            <span class="fw-bold text-expense">-¥8,200</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Cấu hình vẽ biểu đồ đường (Line Chart) theo phong cách tối giản của Apple
+        const ctx = document.getElementById('expenseChart').getContext('2d');
+        
+        // Tạo hiệu ứng màu Gradient chuyển đổ dưới đường line
+        const gradient = ctx.createLinearGradient(0, 0, 0, 250);
+        gradient.addColorStop(0, 'rgba(0, 113, 227, 0.2)');
+        gradient.addColorStop(1, 'rgba(0, 113, 227, 0.0)');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'],
+                datasets: [{
+                    label: 'Chi tiêu (¥)',
+                    data: [3000, 4500, 1500, 3500],
+                    borderColor: '#0071e3',
+                    borderWidth: 3,
+                    backgroundColor: gradient,
+                    fill: true,
+                    tension: 0.4, // Tạo độ cong mềm mại cho nét vẽ
+                    pointBackgroundColor: '#0071e3',
+                    pointRadius: 0,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false } // Ẩn chú thích rườm rà
+                },
+                scales: {
+                    x: {
+                        grid: { display: false }, // Ẩn các lưới dọc
+                        ticks: { color: '#86868b' }
+                    },
+                    y: {
+                        grid: { color: '#f5f5f7' }, // Lưới ngang mờ mượt
+                        border: { dash: [5, 5] },
+                        ticks: { color: '#86868b' }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
