@@ -1,12 +1,12 @@
 <?php 
-require('./dbconnect.php');
+require('./register/dbconnect.php');
 session_start();
 if (!isset($_SESSION['join'])) {
     header('Location: index.php');
     exit();
 }
 if (
-    empty($_SESSION['join']['name']) ||
+    empty($_SESSION['join']['name']) || 
     empty($_SESSION['join']['email']) ||
     empty($_SESSION['join']['password'])
 ) {
