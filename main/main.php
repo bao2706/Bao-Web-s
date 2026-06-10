@@ -69,25 +69,25 @@ $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                 <li class="nav-item">
                     <a class="nav-link active" href="main.php">
-                        <i class="bi bi-house-door-fill"></i>
+                        <p class="bi bi-house-door-fill"> Home</p>
                     </a>
                 </li>
 
                 <li class="nav-item">
                     <a class="nav-link" href="#">
-                        <i class="bi bi-bell-fill"></i>
+                        <p class="bi bi-bell-fill"> Notification</p>
                     </a>
                 </li>
 
                 <li class="nav-item">
                     <a class="nav-link" href="#">
-                        <i class="bi bi-person-circle"></i>
+                        <p class="bi bi-person-circle"> Profile</p>
                     </a>
                 </li>
 
                 <li class="nav-item">
                     <a class="nav-link" href="../register/logout.php">
-                        <i class="bi bi-box-arrow-right"></i>
+                        <p class="bi bi-box-arrow-right"> Log out</p>
                     </a>
                 </li>
 
@@ -170,8 +170,7 @@ $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 Category
                             </label>
 
-                            <select class="form-select" name="category">
-                            <div class="" id="category"></div>
+                            <select class="form-select" name="category" id="category">
                             </select>
                         </div>
                         <button
@@ -210,10 +209,11 @@ $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 $<?= number_format($row['amount'],0) ?>
                             </span>
 
-                            <a href="delete.php?id=<?= $row['id'] ?>"
-                            class="btn btn-danger btn-sm">
-                            Xóa
-                            </a></div>               
+                            <form action="delete.php" method="POST" class="mb-0">
+                                <input type="hidden" name="id" value="<?= (int) $row['id'] ?>">
+                                <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                            </form>
+                        </div>
                     <?php endforeach; ?>
                 <?php endif; ?>
                 </div>
