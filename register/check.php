@@ -1,5 +1,5 @@
 <?php 
-require('./register/dbconnect.php');
+require('./dbconnect.php');
 session_start();
 if (!isset($_SESSION['join'])) {
     header('Location: index.php');

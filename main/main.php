@@ -1,28 +1,39 @@
 <?php
 session_start();
 require("../register/dbconnect.php");
-if(isset($_POST["addIncome"])){
-    $id =$_SESSION["id"];
-    $amount =$_POST["amountInput"];
-    $category =$_POST["category"];
+
+if (!isset($_SESSION['id'])) {
+    header('Location: ../register/login.php');
+    exit();
+}
+
+$userId = (int) $_SESSION['id'];
+
+if(isset($_POST["add"])){
     $stmt = $db->prepare(
-    "INSERT INTO income(user_id,amount, content)
-     VALUES(?,?, ?)"
+    "INSERT INTO income(user_id,amount, category, type)
+     VALUES(?,?, ?, ?)"
     );
 
     $stmt->execute([
-    $_SESSION["id"],
-    $_POST['amountInput'],
-    $_POST['category']
+    $userId,
+    (int) $_POST['amountInput'],
+    $_POST['category'],
+    $_POST["type"]
     ]);
+
+    header('Location: main.php');
+    exit();
 }
 // SELECT
 $stmt = $db->prepare("
-SELECT * FROM income WHERE user_id = ?
+SELECT * FROM income
+WHERE user_id = ?
+ORDER BY id DESC
 ");
 
-$stmt->execute([$_SESSION["id"]]);
-$data = $stmt->fetchAll();
+$stmt->execute([$userId]);
+$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -32,6 +43,7 @@ $data = $stmt->fetchAll();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
+    <script src="../js/category.js" defer></script>
 
     <title>貯金ウェブサイト</title>
 </head>
@@ -145,25 +157,28 @@ $data = $stmt->fetchAll();
                                 name="amountInput"
                                 required>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label">Type</label>
 
+                            <select class="form-select" name="type" id="type">
+                                <option value="income">Income 💰</option>
+                                <option value="expense">Expense 💸</option>
+                            </select>
+                        </div>
                         <div class="mb-3">
                             <label class="form-label">
                                 Category
                             </label>
 
                             <select class="form-select" name="category">
-                                <option>Food & Dining 🍔</option>
-                                <option>Transportation 🚗</option>
-                                <option>Shopping 🛍️</option>
-                                <option>Entertainment 🎬</option>
+                            <div class="" id="category"></div>
                             </select>
                         </div>
-
                         <button
                             type="submit"
                             class="btn btn-primary w-100"
-                            name="addIncome">
-                            Add Income
+                            name="add">
+                            add
                         </button>
 
                     </form>
@@ -180,11 +195,27 @@ $data = $stmt->fetchAll();
                 <div class="card-body">
                     <h5>Recent Transactions</h5>
                     <p class="text-muted mb-0"></p>
-                <?php foreach ($data as $row): ?>
-                    <div>
-                        <?= $row['amount'] ?> - <?= $row['content'] ?>
-                    </div>
-                <?php endforeach; ?>
+                <?php if (empty($data)): ?>
+                    <div class="text-muted">No transactions yet.</div>
+                <?php else: ?>
+                    <?php foreach ($data as $row): ?>
+                        
+                        <div class="d-flex justify-content-between border-bottom py-2">
+                            <span><?= htmlspecialchars($row['category']) ?></span>
+                                                        <span class="<?= $row['type'] == 'income'
+                                ? 'text-success'
+                                : 'text-danger' ?> fw-bold">
+
+                                <?= $row['type'] == 'income' ? '+' : '-' ?>
+                                $<?= number_format($row['amount'],0) ?>
+                            </span>
+
+                            <a href="delete.php?id=<?= $row['id'] ?>"
+                            class="btn btn-danger btn-sm">
+                            Xóa
+                            </a></div>               
+                    <?php endforeach; ?>
+                <?php endif; ?>
                 </div>
             </div>
 
