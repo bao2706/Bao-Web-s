@@ -1,6 +1,5 @@
 const typeSelect = document.getElementById('type');
 const categorySelect = document.getElementById('category');
-const filterSelect = document.getElementById('filter');
 
 function updateCategory() {
     if (!typeSelect || !categorySelect) {
@@ -41,20 +40,4 @@ if (typeSelect && categorySelect) {
 
 if (typeSelect) {
     typeSelect.addEventListener('change', updateCategory);
-}
-
-if (filterSelect) {
-    filterSelect.addEventListener('change', function () {
-        const period = this.value;
-
-        fetch('get_transactions.php?period=' + period)
-            .then(response => response.text())
-            .then(data => {
-                const transactions = document.getElementById('transactions');
-
-                if (transactions) {
-                    transactions.innerHTML = data;
-                }
-            });
-    });
 }

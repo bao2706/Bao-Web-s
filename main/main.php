@@ -10,6 +10,8 @@ if (!isset($_SESSION['id'])) {
 $userId = (int) $_SESSION['id'];
 
 if (isset($_POST['add'])) {
+    $amountInput = isset($_POST['amountInput']) ? (float) $_POST['amountInput'] : 0;
+
     $insertStmt = $db->prepare(
         'INSERT INTO income (user_id, amount, category, type, content, created_at)
          VALUES (?, ?, ?, ?, ?, NOW())'
@@ -17,7 +19,7 @@ if (isset($_POST['add'])) {
 
     $insertStmt->execute([
         $userId,
-        (int) $_POST['amountInput'],
+        $amountInput,
         $_POST['category'],
         $_POST['type'],
         $_POST['content'],
@@ -27,7 +29,9 @@ if (isset($_POST['add'])) {
     exit();
 }
 
+$allowedPeriods = ['day', 'week', 'month'];
 $period = $_GET['period'] ?? 'month';
+$period = in_array($period, $allowedPeriods, true) ? $period : 'month';
 
 if ($period === 'day') {
     $transactionsStmt = $db->prepare(
@@ -193,7 +197,7 @@ if ($totalIncome <= 0) {
                         <form action="" method="POST">
                             <div class="mb-3">
                                 <label class="form-label">Amount ($)</label>
-                                <input type="number" class="form-control" name="amountInput" value="0" required>
+                                <input type="number" class="form-control" name="amountInput" value="" min="0" step="1" required>
                             </div>
 
                             <div class="mb-3">
@@ -228,9 +232,9 @@ if ($totalIncome <= 0) {
 
                             <form action="" method="GET" class="ms-auto">
                                 <select name="period" id="filter" class="form-select rounded w-auto" onchange="this.form.submit()">
-                                    <option value="day">Day</option>
-                                    <option value="week">Week</option>
-                                    <option value="month">Month</option>
+                                    <option value="day"<?= $period === 'day' ? ' selected' : '' ?>>Day</option>
+                                <option value="week"<?= $period === 'week' ? ' selected' : '' ?>>Week</option>
+                                <option value="month"<?= $period === 'month' ? ' selected' : '' ?>>Month</option>
                                 </select>
                             </form>
                         </div>
@@ -260,7 +264,7 @@ if ($totalIncome <= 0) {
                                     <div class="text-end">
                                         <div class="<?= $row['type'] == 'income' ? 'text-success' : 'text-danger' ?> fw-bold">
                                             <?= $row['type'] == 'income' ? '+' : '-' ?>
-                                            ¥<?= number_format($row['amount']) ?>
+                                            $<?= number_format($row['amount']) ?>
                                         </div>
 
                                         <div class="dropdown mt-1">
