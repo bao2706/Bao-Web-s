@@ -6,11 +6,14 @@ if (!isset($_SESSION['id'])) {
     header('Location: ../register/login.php');
     exit();
 }
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['id'])) {
+if (isset($_POST['id'])) {
+    $id = (int) $_POST['id'];
+} elseif (isset($_GET['id'])) {
+    $id = (int) $_GET['id'];
+} else {
     header('Location: main.php');
     exit();
 }
-$id = (int) $_POST['id'];
 
 if ($id <= 0) {
     header('Location: main.php');
