@@ -19,4 +19,3 @@ if (nameInput) {
         nameInput.classList.remove('is-invalid');
     });
 }
-console.log('Login script loaded');

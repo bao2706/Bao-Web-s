@@ -1,43 +1,35 @@
 const typeSelect = document.getElementById('type');
 const categorySelect = document.getElementById('category');
 
-function updateCategory() {
+const categoryOptions = {
+    income: ['Salary', 'Bonus', 'Investment'],
+    expense: ['Food', 'Transportation', 'Shopping', 'Entertainment'],
+};
+
+function updateCategory(selectedCategory = '') {
     if (!typeSelect || !categorySelect) {
         return;
     }
 
-    if (typeSelect.value === 'income') {
-        categorySelect.innerHTML = `
-            <option>Salary 💰</option>
-            <option>Bonus 🎁</option>
-            <option>Investment 📈</option>
-        `;
-    } else {
-        categorySelect.innerHTML = `
-            <option>Food 🍔</option>
-            <option>Transportation 🚗</option>
-            <option>Shopping 🛍️</option>
-            <option>Entertainment 🎬</option>
-        `;
+    const categories = categoryOptions[typeSelect.value] || categoryOptions.expense;
+
+    categorySelect.innerHTML = categories
+        .map((category) => `<option value="${category}">${category}</option>`)
+        .join('');
+
+    if (selectedCategory && categories.includes(selectedCategory)) {
+        categorySelect.value = selectedCategory;
     }
 }
-
-updateCategory();
 
 if (typeSelect && categorySelect) {
     const currentType = typeSelect.dataset.currentType;
     const currentCategory = categorySelect.dataset.currentCategory;
 
-    if (currentType) {
+    if (currentType && categoryOptions[currentType]) {
         typeSelect.value = currentType;
-        updateCategory();
-
-        if (currentCategory) {
-            categorySelect.value = currentCategory;
-        }
     }
-}
 
-if (typeSelect) {
-    typeSelect.addEventListener('change', updateCategory);
+    updateCategory(currentCategory);
+    typeSelect.addEventListener('change', () => updateCategory());
 }

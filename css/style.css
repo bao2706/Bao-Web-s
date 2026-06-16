@@ -4,7 +4,7 @@
 }
 
 body {
-    background-color: Silver;
+    background-color: #f4f6f8;
 }
 
 .stat-icon {
@@ -30,4 +30,17 @@ body {
 .add {
     padding: 20px;
     text-align: left;
+}
+
+.transaction-icon {
+    width: 3rem;
+    height: 3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.dropdown-menu form {
+    margin: 0;
 }
