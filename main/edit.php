@@ -25,7 +25,7 @@ if ($id <= 0) {
 }
 
 $stmt = $db->prepare(
-    'SELECT *
+    'SELECT id, amount, category, type, content
      FROM income
      WHERE id = ? AND user_id = ?
      LIMIT 1'

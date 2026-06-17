@@ -11,7 +11,7 @@ if (!empty($_POST)) {
     if ($email === '' || $password === '') {
         $error['login'] = 'Please enter your email and password.';
     } else {
-        $stmt = $db->prepare('SELECT id, name, password FROM members WHERE email = ? LIMIT 1');
+        $stmt = $db->prepare('SELECT id, name, email, password FROM members WHERE email = ? LIMIT 1');
         $stmt->execute([$email]);
         $user = $stmt->fetch();
 
@@ -20,6 +20,7 @@ if (!empty($_POST)) {
 
             $_SESSION['id'] = $user['id'];
             $_SESSION['name'] = $user['name'];
+            $_SESSION['email'] = $user['email'];
 
             header('Location: ../main/main.php');
             exit();

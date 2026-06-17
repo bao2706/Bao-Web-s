@@ -56,38 +56,54 @@ if (isset($_POST['add'])) {
     }
 }
 
-$allowedPeriods = ['day', 'week', 'month'];
-$period = $_GET['period'] ?? 'month';
-$period = in_array($period, $allowedPeriods, true) ? $period : 'month';
-
-if ($period === 'day') {
-    $transactionsStmt = $db->prepare(
-        'SELECT *
-         FROM income
-         WHERE user_id = ?
-           AND DATE(created_at) = CURDATE()
-         ORDER BY created_at DESC'
-    );
-} elseif ($period === 'week') {
-    $transactionsStmt = $db->prepare(
-        'SELECT *
-         FROM income
-         WHERE user_id = ?
-           AND YEARWEEK(created_at, 1) = YEARWEEK(CURDATE(), 1)
-         ORDER BY created_at DESC'
-    );
-} else {
-    $transactionsStmt = $db->prepare(
-        'SELECT *
-         FROM income
-         WHERE user_id = ?
-           AND MONTH(created_at) = MONTH(CURDATE())
-           AND YEAR(created_at) = YEAR(CURDATE())
-         ORDER BY created_at DESC'
-    );
+$selectedDate = $_GET['selected_date'] ?? date('Y-m-d');
+$selectedDateObj = DateTime::createFromFormat('Y-m-d', $selectedDate);
+if (!$selectedDateObj || $selectedDateObj->format('Y-m-d') !== $selectedDate) {
+    $selectedDate = date('Y-m-d');
+    $selectedDateObj = new DateTime($selectedDate);
 }
 
-$transactionsStmt->execute([$userId]);
+$dateAction = $_GET['date_action'] ?? '';
+if ($dateAction === 'prev') {
+    $selectedDateObj = (clone $selectedDateObj)->modify('-1 day');
+} elseif ($dateAction === 'next') {
+    $selectedDateObj = (clone $selectedDateObj)->modify('+1 day');
+}
+
+$selectedDate = $selectedDateObj->format('Y-m-d');
+$prevDate = (clone $selectedDateObj)->modify('-1 day')->format('Y-m-d');
+$nextDate = (clone $selectedDateObj)->modify('+1 day')->format('Y-m-d');
+
+$page = max(1, (int) ($_GET['page'] ?? 1));
+$perPage = 6;
+
+$countStmt = $db->prepare(
+    'SELECT COUNT(*)
+     FROM income
+     WHERE user_id = ?
+    AND DATE(created_at) = ?'
+);
+$countStmt->execute([$userId, $selectedDate]);
+$totalItems = (int) $countStmt->fetchColumn();
+$totalPages = max(1, (int) ceil($totalItems / $perPage));
+$page = min($page, $totalPages);
+$offset = ($page - 1) * $perPage;
+
+$limit = (int) $perPage;
+$offset = (int) $offset;
+
+$transactionsStmt = $db->prepare(
+    'SELECT *
+     FROM income
+     WHERE user_id = ?
+       AND DATE(created_at) = ?
+     ORDER BY created_at DESC
+     LIMIT ' . $limit . ' OFFSET ' . $offset
+);
+$transactionsStmt->execute([
+    $userId,
+    $selectedDate,
+]);
 $data = $transactionsStmt->fetchAll();
 
 $summaryStmt = $db->prepare(
@@ -96,10 +112,9 @@ $summaryStmt = $db->prepare(
         COALESCE(SUM(CASE WHEN type = "expense" THEN amount ELSE 0 END), 0) AS total_expense
      FROM income
      WHERE user_id = ?
-       AND MONTH(created_at) = MONTH(CURDATE())
-       AND YEAR(created_at) = YEAR(CURDATE())'
+       AND DATE(created_at) = ?'
 );
-$summaryStmt->execute([$userId]);
+$summaryStmt->execute([$userId, $selectedDate]);
 $summary = $summaryStmt->fetch() ?: [
     'total_income' => 0,
     'total_expense' => 0,
@@ -159,7 +174,7 @@ if ($totalIncome <= 0) {
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">
+                        <a class="nav-link" href="profile.php">
                             <i class="bi bi-person-circle"></i>
                             <?= htmlspecialchars($_SESSION['name'] ?? 'User') ?>
                         </a>
@@ -262,18 +277,39 @@ if ($totalIncome <= 0) {
                         <div class="d-flex align-items-center gap-3">
                             <h5 class="mb-0">Recent Transactions</h5>
 
-                            <form action="" method="GET" class="ms-auto">
-                                <label for="filter" class="visually-hidden">Filter period</label>
-                                <select name="period" id="filter" class="form-select rounded w-auto" onchange="this.form.submit()">
-                                    <option value="day"<?= $period === 'day' ? ' selected' : '' ?>>Day</option>
-                                    <option value="week"<?= $period === 'week' ? ' selected' : '' ?>>Week</option>
-                                    <option value="month"<?= $period === 'month' ? ' selected' : '' ?>>Month</option>
-                                </select>
+                            <form action="" method="GET" class="ms-auto d-flex align-items-center gap-2">
+                                <button type="submit" name="date_action" value="prev" class="btn btn-outline-secondary btn-sm" aria-label="Previous date">
+                                    <i class="bi bi-chevron-left"></i>
+                                </button>
+
+                                <input
+                                    type="date"
+                                    name="selected_date"
+                                    class="form-control form-control-sm"
+                                    value="<?= htmlspecialchars($selectedDate) ?>"
+                                    onchange="this.form.submit()"
+                                >
+
+                                <button type="submit" name="date_action" value="next" class="btn btn-outline-secondary btn-sm" aria-label="Next date">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
                             </form>
                         </div>
 
+                        <div class="text-muted small mt-2">
+                            Showing: <?= htmlspecialchars(date('d M Y', strtotime($selectedDate))) ?>
+                        </div>
+
+                        <?php if ($totalItems > 0): ?>
+                            <div class="text-muted small mb-2">
+                                Page <?= (int) $page ?> of <?= (int) $totalPages ?> · <?= (int) $totalItems ?> item(s)
+                            </div>
+                        <?php endif; ?>
+
                         <?php if (empty($data)): ?>
-                            <div class="text-muted mt-3">No transactions yet.</div>
+                            <div class="text-muted mt-3">
+                                No transactions for <?= htmlspecialchars(date('d M Y', strtotime($selectedDate))) ?>.
+                            </div>
                         <?php else: ?>
                             <?php foreach ($data as $row): ?>
                                 <?php
@@ -281,19 +317,25 @@ if ($totalIncome <= 0) {
                                 $category = trim((string) ($row['category'] ?? 'Other'));
                                 $category = $category !== '' ? $category : 'Other';
                                 $content = trim((string) ($row['content'] ?? ''));
-                                $categoryInitial = strtoupper(substr($category, 0, 1));
                                 $amountClass = $rowType === 'income' ? 'text-success' : 'text-danger';
                                 $amountSign = $rowType === 'income' ? '+' : '-';
+                                $rowAccentClass = $rowType === 'income' ? 'transaction-row-income' : 'transaction-row-expense';
+                                $iconClass = $rowType === 'income' ? 'bi bi-arrow-up-right-circle' : 'bi bi-arrow-down-left-circle';
+                                $iconBgClass = $rowType === 'income' ? 'transaction-icon-income' : 'transaction-icon-expense';
+                                $badgeClass = $rowType === 'income' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger';
                                 ?>
-                                <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
+                                <div class="transaction-row <?= $rowAccentClass ?> d-flex justify-content-between align-items-center py-3 px-3 rounded-3 border-bottom">
                                     <div class="d-flex align-items-center">
-                                        <div class="bg-warning-subtle rounded-4 p-3 me-3 transaction-icon">
-                                            <?= htmlspecialchars($categoryInitial) ?>
+                                        <div class="transaction-icon <?= $iconBgClass ?> rounded-4 me-3">
+                                            <i class="<?= $iconClass ?>"></i>
                                         </div>
 
                                         <div>
-                                            <div class="fw-bold">
+                                            <div class="fw-bold d-flex align-items-center gap-2">
                                                 <?= htmlspecialchars($content !== '' ? $content : $category) ?>
+                                                <span class="badge <?= $badgeClass ?> rounded-pill">
+                                                    <?= htmlspecialchars(ucfirst($rowType)) ?>
+                                                </span>
                                             </div>
                                             <small class="text-muted">
                                                 <?= htmlspecialchars($category) ?> - <?= htmlspecialchars($row['created_at'] ?? '') ?>
@@ -307,19 +349,23 @@ if ($totalIncome <= 0) {
                                         </div>
 
                                         <div class="dropdown mt-1">
-                                            <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown" aria-label="Transaction actions">
+                                            <button class="btn btn-sm btn-light transaction-action-btn" type="button" data-bs-toggle="dropdown" aria-label="Transaction actions">
                                                 <i class="bi bi-three-dots"></i>
                                             </button>
 
                                             <ul class="dropdown-menu dropdown-menu-end">
                                                 <li>
-                                                    <a class="dropdown-item" href="edit.php?id=<?= (int) $row['id'] ?>">Edit</a>
+                                                    <a class="dropdown-item" href="edit.php?id=<?= (int) $row['id'] ?>">
+                                                        <i class="bi bi-pencil-square me-2"></i>Edit
+                                                    </a>
                                                 </li>
                                                 <li>
                                                     <form action="delete.php" method="POST" onsubmit="return confirm('Delete this transaction?')">
                                                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
                                                         <input type="hidden" name="id" value="<?= (int) $row['id'] ?>">
-                                                        <button type="submit" class="dropdown-item text-danger">Delete</button>
+                                                        <button type="submit" class="dropdown-item text-danger">
+                                                            <i class="bi bi-trash3 me-2"></i>Delete
+                                                        </button>
                                                     </form>
                                                 </li>
                                             </ul>
@@ -327,6 +373,22 @@ if ($totalIncome <= 0) {
                                     </div>
                                 </div>
                             <?php endforeach; ?>
+                        <?php endif; ?>
+
+                        <?php if ($totalPages > 1): ?>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <a class="btn btn-sm btn-outline-secondary <?= $page <= 1 ? 'disabled' : '' ?>"
+                                   href="main.php?selected_date=<?= urlencode($selectedDate) ?>&page=<?= max(1, $page - 1) ?>">
+                                    <i class="bi bi-chevron-left"></i> Previous
+                                </a>
+
+                                <span class="text-muted small">Page <?= (int) $page ?></span>
+
+                                <a class="btn btn-sm btn-outline-secondary <?= $page >= $totalPages ? 'disabled' : '' ?>"
+                                   href="main.php?selected_date=<?= urlencode($selectedDate) ?>&page=<?= min($totalPages, $page + 1) ?>">
+                                    Next <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </div>
                         <?php endif; ?>
                     </div>
                 </div>

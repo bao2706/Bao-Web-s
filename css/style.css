@@ -7,6 +7,21 @@ body {
     background-color: #f4f6f8;
 }
 
+.profile-avatar {
+    width: 110px;
+    height: 110px;
+    background: linear-gradient(135deg, #0d6efd, #6f42c1);
+    color: #fff;
+    font-size: 2rem;
+    font-weight: 700;
+    box-shadow: 0 10px 25px rgba(13, 110, 253, 0.2);
+    object-fit: cover;
+}
+
+.object-fit-cover {
+    object-fit: cover;
+}
+
 .stat-icon {
     width: 2rem;
     height: 2rem;
@@ -39,6 +54,46 @@ body {
     align-items: center;
     justify-content: center;
     font-weight: 700;
+    font-size: 1rem;
+}
+
+.transaction-row {
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.transaction-row:hover {
+    background-color: #f8f9fa;
+}
+
+.transaction-row-income {
+    border-left: 4px solid #198754;
+}
+
+.transaction-row-expense {
+    border-left: 4px solid #dc3545;
+}
+
+.transaction-icon-income {
+    background: #e8f7ee;
+    color: #198754;
+}
+
+.transaction-icon-expense {
+    background: #fdeaea;
+    color: #dc3545;
+}
+
+.transaction-action-btn {
+    border: 1px solid #dee2e6;
+}
+
+.transaction-action-btn:hover {
+    background-color: #f8f9fa;
+}
+
+.dropdown-menu .dropdown-item {
+    display: flex;
+    align-items: center;
 }
 
 .dropdown-menu form {
